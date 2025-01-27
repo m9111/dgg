@@ -40,6 +40,11 @@ class TextState:
         self.last_updated = datetime.datetime.now()
         self.active_connections: Set[asyncio.Queue] = set()
 
+    def process_text(self, text: str) -> str:
+        """Remove periods from text"""
+        return text.replace(".", "")
+
+
     async def broadcast(self, message: dict):
         dead_connections = set()
         for queue in self.active_connections:
@@ -80,6 +85,7 @@ async def receive_text(text_data: ReceiveText):
     """Receive text from external source and broadcast to all connected clients"""
     if text_data.text != text_state.current_text:
         text_state.current_text = text_data.text
+        text_state.current_text = text_state.process_text(text_state.current_text)
         text_state.last_updated = datetime.datetime.now()
         
         # Broadcast to all connected clients
